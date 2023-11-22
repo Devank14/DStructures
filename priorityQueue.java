@@ -87,7 +87,7 @@ public class priorityQueue {
                 minIndex = leftChildIndex;
             }
 
-            while (heap.get(parent) > heap.get(minIndex) && minIndex < heap.size() - 1) {
+            while (minIndex < heap.size() - 1 && heap.get(parent) > heap.get(minIndex)) {
 
                 int temp = heap.get(parent);
                 heap.set(parent, heap.get(minIndex));
