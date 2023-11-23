@@ -20,7 +20,9 @@ public class priorityQueue {
         pq.insert(2);
 
         List<Integer> allValues = Arrays.asList(52, 8, 6, 29, 36, 21, 24, 18, 42, 2);
-        pq.inPlaceHeapSort(new ArrayList<Integer>(allValues));
+        ArrayList<Integer> listy = pq.inPlaceHeapSort(new ArrayList<Integer>(allValues));
+
+        System.out.println(listy.toString());
 
         // ArrayList<Integer> aList = pq.heapSort();
         // System.out.println(aList.toString());
@@ -84,7 +86,7 @@ public class priorityQueue {
             int minIndex = 0;
 
             if (rightChildIndex < heap.size() - 1 && leftChildIndex < heap.size() - 1) {
-                    minIndex = (heap.get(rightChildIndex) > heap.get(leftChildIndex)) ? leftChildIndex
+                minIndex = (heap.get(rightChildIndex) > heap.get(leftChildIndex)) ? leftChildIndex
                         : rightChildIndex;
             } else if (rightChildIndex < heap.size() - 1) {
                 minIndex = rightChildIndex;
@@ -121,8 +123,8 @@ public class priorityQueue {
 
     public ArrayList<Integer> heapSort() throws PriorityQueueException {
 
-        //The space complexity of Heap Sort is O(n)
-        //We have to reduce it.
+        // The space complexity of Heap Sort is O(n)
+        // We have to reduce it.
         ArrayList<Integer> alist = new ArrayList<Integer>();
         while (!heap.isEmpty()) {
             alist.add(removeMin());
@@ -130,41 +132,44 @@ public class priorityQueue {
         return alist;
     }
 
-    public void inPlaceHeapSort(ArrayList<Integer> alist){
+    /**
+     * @param alist
+     * @return
+     */
+    public ArrayList<Integer> inPlaceHeapSort(ArrayList<Integer> alist) {
 
-/*         
-        First we will have to create a heap out of this list
-        How is a heap created? - Maintaining CBT and heap property.
-        CBT is already achieved. We have to add elements one by one. 
-*/
-        int index = 0, parentIndex =0, leftChild = 0, rightChild =0;
+        /*
+         * First we will have to create a heap out of this list
+         * How is a heap created? - Maintaining CBT and heap property.
+         * CBT is already achieved. We have to add elements one by one.
+         */
+        int index = 0, parentIndex = 0, leftChild = 0, rightChild = 0;
 
         ArrayList<Integer> newHeap = new ArrayList<Integer>();
 
-        for(Integer element : alist){
+        for (Integer element : alist) {
             newHeap.add(element);
-            index = newHeap.size()-1;
-            parentIndex = (index-1)/2;
+            index = newHeap.size() - 1;
+            parentIndex = (index - 1) / 2;
 
-            while(parentIndex >= 0 && newHeap.get(parentIndex) > newHeap.get(index)){
+            while (parentIndex >= 0 && newHeap.get(parentIndex) > newHeap.get(index)) {
                 int temp = newHeap.get(parentIndex);
                 newHeap.set(parentIndex, newHeap.get(index));
                 newHeap.set(index, temp);
                 index = parentIndex;
-                parentIndex = (index-1)/2;
+                parentIndex = (index - 1) / 2;
             }
         }
-/* 
-        We have transformed the newHeap into a min heap.
-        Now we have to remove elements one-by-one while 
-        maintaining the min heap property. Since this is an 
-        inplace version, the element removed from the top, 
-        will be placed at the end. So we have to keep where 
-        the heap is ending after every removal.
- */
-    
-        int lastIndex = newHeap.size()-1;
-        while(lastIndex >= 0){
+        /*
+         * We have transformed the newHeap into a min heap. Now we have to
+         * remove elements one-by-one while maintaining the min heap property.
+         * Since this is an inplace version, the element removed from the top,
+         * will be placed at the end. So we have to keep where the heap is ending
+         * after every removal. :)
+         */
+
+        int lastIndex = newHeap.size() - 1;
+        while (lastIndex >= 0) {
             int current = 0;
             int removedElement = newHeap.get(current);
             newHeap.set(current, newHeap.get(lastIndex));
@@ -172,28 +177,40 @@ public class priorityQueue {
 
             leftChild = 1;
             rightChild = 2;
-            int minIndex = (newHeap.get(leftChild) > newHeap.get(rightChild)) ? rightChild : leftChild;
+            int minIndex;
+            if (leftChild < lastIndex && rightChild < lastIndex) {
+                minIndex = (newHeap.get(leftChild) > newHeap.get(rightChild)) ? rightChild : leftChild;
+            } else if (leftChild <= lastIndex) {
+                minIndex = leftChild;
+            } else {
+                minIndex = newHeap.size();
+            }
 
-            if(newHeap.get(current) > newHeap.get(leftChild) || newHeap.get(current) > newHeap.get(rightChild)){
+            lastIndex--;
 
-                int temp = newHeap.get(minIndex);
-                newHeap.set(minIndex, newHeap.get(current));
-                newHeap.set(current, temp);
+            while (minIndex < newHeap.size()) {
+                if (newHeap.get(current) > newHeap.get(leftChild) || newHeap.get(current) > newHeap.get(rightChild)) {
+                    int temp = newHeap.get(minIndex);
+                    newHeap.set(minIndex, newHeap.get(current));
+                    newHeap.set(current, temp);
 
-                current = minIndex;
-                leftChild = 2*current+1;
-                rightChild = 2*current+2;
+                    current = minIndex;
+                    leftChild = 2 * current + 1;
+                    rightChild = 2 * current + 2;
 
-                if(leftChild < lastIndex && rightChild <= lastIndex){
-
-                }else if(leftChild <= lastIndex){
-
-                }else{
-                    
+                    if (leftChild < lastIndex && rightChild < lastIndex) {
+                        minIndex = (newHeap.get(leftChild) > newHeap.get(rightChild)) ? rightChild : leftChild;
+                    } else if (leftChild <= lastIndex) {
+                        minIndex = leftChild;
+                    } else {
+                        minIndex = newHeap.size();
+                    }
+                } else {
+                    break;
                 }
             }
         }
-
+        return newHeap;
     }
 
 }
