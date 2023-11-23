@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class priorityQueue {
 
@@ -17,8 +19,11 @@ public class priorityQueue {
         pq.insert(42);
         pq.insert(2);
 
-        ArrayList<Integer> aList = pq.heapSort();
-        System.out.println(aList.toString());
+        List<Integer> allValues = Arrays.asList(52, 8, 6, 29, 36, 21, 24, 18, 42, 2);
+        pq.inPlaceHeapSort(new ArrayList<Integer>(allValues));
+
+        // ArrayList<Integer> aList = pq.heapSort();
+        // System.out.println(aList.toString());
     }
 
     private static ArrayList<Integer> heap;
@@ -115,11 +120,80 @@ public class priorityQueue {
     }
 
     public ArrayList<Integer> heapSort() throws PriorityQueueException {
+
+        //The space complexity of Heap Sort is O(n)
+        //We have to reduce it.
         ArrayList<Integer> alist = new ArrayList<Integer>();
         while (!heap.isEmpty()) {
             alist.add(removeMin());
         }
         return alist;
+    }
+
+    public void inPlaceHeapSort(ArrayList<Integer> alist){
+
+/*         
+        First we will have to create a heap out of this list
+        How is a heap created? - Maintaining CBT and heap property.
+        CBT is already achieved. We have to add elements one by one. 
+*/
+        int index = 0, parentIndex =0, leftChild = 0, rightChild =0;
+
+        ArrayList<Integer> newHeap = new ArrayList<Integer>();
+
+        for(Integer element : alist){
+            newHeap.add(element);
+            index = newHeap.size()-1;
+            parentIndex = (index-1)/2;
+
+            while(parentIndex >= 0 && newHeap.get(parentIndex) > newHeap.get(index)){
+                int temp = newHeap.get(parentIndex);
+                newHeap.set(parentIndex, newHeap.get(index));
+                newHeap.set(index, temp);
+                index = parentIndex;
+                parentIndex = (index-1)/2;
+            }
+        }
+/* 
+        We have transformed the newHeap into a min heap.
+        Now we have to remove elements one-by-one while 
+        maintaining the min heap property. Since this is an 
+        inplace version, the element removed from the top, 
+        will be placed at the end. So we have to keep where 
+        the heap is ending after every removal.
+ */
+    
+        int lastIndex = newHeap.size()-1;
+        while(lastIndex >= 0){
+            int current = 0;
+            int removedElement = newHeap.get(current);
+            newHeap.set(current, newHeap.get(lastIndex));
+            newHeap.set(lastIndex, removedElement);
+
+            leftChild = 1;
+            rightChild = 2;
+            int minIndex = (newHeap.get(leftChild) > newHeap.get(rightChild)) ? rightChild : leftChild;
+
+            if(newHeap.get(current) > newHeap.get(leftChild) || newHeap.get(current) > newHeap.get(rightChild)){
+
+                int temp = newHeap.get(minIndex);
+                newHeap.set(minIndex, newHeap.get(current));
+                newHeap.set(current, temp);
+
+                current = minIndex;
+                leftChild = 2*current+1;
+                rightChild = 2*current+2;
+
+                if(leftChild < lastIndex && rightChild <= lastIndex){
+
+                }else if(leftChild <= lastIndex){
+
+                }else{
+                    
+                }
+            }
+        }
+
     }
 
 }
