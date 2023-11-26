@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
@@ -12,6 +13,7 @@ public class priorityQueueUse {
         System.out.println(Arrays.toString(arr));
         pqUse.checkMaxHeap(new int[] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 7 });
         System.out.println(pqUse.kthLargest(new int[] { 10101, 565, 4921, 60 }, 2));
+        pqUse.findMedian(new int[] { 6, 2, 1, 3, 7, 5 });
     }
 
     /*
@@ -198,27 +200,114 @@ public class priorityQueueUse {
     // running list of integers, print the resulting median.
 
     public void findMedian(int arr[]) {
+
         /*
-         * Keep adding the elements into the priority queue, after
-         * each addition, check size of the PQ. If size is odd, then
-         * remove till (size/2+1) elements and print. If size is even,
-         * remove till (size/2 - 1) and (size/2), store them and print.
+         * Approach: Keep two heaps, one max heap and one min heap.
+         * The larger elements will be placed in the min heap while the smaller
+         * elements will be placed in the max heap. Such that at any point, the
+         * max heap will return the largest of the smaller elements, while the min
+         * heap will return the smallest of the larger elements. The largest element
+         * in the max heap will be smaller than the smallest element in the min heap.
+         * The average of removal of both the heaps will be the median, if there
+         * are even number of elements. If there are odd number of elements, then
+         * the removal will happen from the larger of the two heaps, which will
+         * be the median.
+         * 
+         * This whole idea works only when elements are added in the correct order.
+         * Always maintain: abs(maxHeap.size - minHeap.size) <= 1
+         * 
+         * Add first element to max heap.
+         * If maxHeap.peek() > new element -> Add new element to max heap, and existing
+         * to min heap.
+         * If maxHeap.peek() < new element -> Add new element into min heap.
+         * 
+         * Now, we have following three items:
+         * minHeap.peek(), maxHeap.peek() and new element.
+         * Remember: minHeap.peek() > maxHeap.peek(), This should be maintained always.
+         * 
+         * new-element > minHeap.peek(),
+         * If size of min Heap is greater, remove one from minHeap, add to the maxheap
+         * and add the new element to the min Heap. Otherwise just add to the min heap.
+         * 
+         * new-element < maxHeap.peek(),
+         * If size of max Heap is greater, remove one from maxHeap, add to the minheap
+         * and add the new element to the max Heap. Otherwise just add to the max heap.
+         * 
+         * maxHeap.peek() < new-element < minHeap.peek()
+         * Just add the element into the smaller heap. If sizes are same, add to the one
+         * where difference between the peek and the new element is smaller.
+         * 
+         * At any point, when we have to print the median, we will not actually remove
+         * the element, but just have a look at the peek(), since who will do the task of
+         * adding the elements back into the respective heaps.
          */
 
-        // PriorityQueue<Integer> pq = new PriorityQueue<Integer>();
-        // int i = 0;
-        // while (i < arr.length) {
-        //     for (int j = 0; j <= i; j++) {
-        //         pq.add(arr[j]);
-        //     }
-        //     int size = pq.size();
+        if (arr.length == 0) {
+            System.out.println(arr.length);
+            return;
+        } else if (arr.length == 1) {
+            System.out.println(arr[0]);
+            return;
+        }
 
-        //     if (size % 2 == 0) {
-        //         while(size/2)
-        //     } else {
+        PriorityQueue<Integer> maxHeap = new PriorityQueue<Integer>(Collections.reverseOrder());
+        PriorityQueue<Integer> minHeap = new PriorityQueue<Integer>();
 
-        //     }
-        // }
+        int minHeap_size = 0;
+        int maxHeap_size = 0;
+
+        // Add the first element to the max heap.
+        maxHeap.add(arr[0]);
+        System.out.println(maxHeap.peek());
+
+        for (int i = 1; i < arr.length; i++) {
+
+            minHeap_size = minHeap.size();
+            maxHeap_size = maxHeap.size();
+
+            if (maxHeap_size > minHeap_size) {
+
+                if (maxHeap.peek() > arr[i]) {
+                    minHeap.add(maxHeap.remove());
+                    maxHeap.add(arr[i]);
+                } else if (minHeap.peek() < arr[i]) {
+                    minHeap.add(arr[i]);
+                } else {
+                    minHeap.add(arr[i]);
+                }
+
+            } else if (maxHeap_size < minHeap_size) {
+
+                if (maxHeap.peek() > arr[i]) {
+                    maxHeap.add(arr[i]);
+                } else if (minHeap.peek() < arr[i]) {
+                    maxHeap.add(minHeap.remove());
+                    minHeap.add(arr[i]);
+                } else {
+                    maxHeap.add(arr[i]);
+                }
+
+            } else {
+                if(Math.abs(maxHeap.peek() - arr[i]) > Math.abs(minHeap.peek() - arr[i])){
+                    minHeap.add(arr[i]);
+                }else if (Math.abs(maxHeap.peek() - arr[i]) < Math.abs(minHeap.peek() - arr[i])){
+                    maxHeap.add(arr[i]);
+                }else{
+                    maxHeap.add(arr[i]);
+                }
+            }
+
+            minHeap_size = minHeap.size();
+            maxHeap_size = maxHeap.size();
+
+            if (minHeap_size > maxHeap_size) {
+                System.out.println(minHeap.peek());
+            } else if (minHeap_size < maxHeap_size) {
+                System.out.println(maxHeap.peek());
+            } else {
+                System.out.println((maxHeap.peek() + minHeap.peek()) / 2);
+            }
+        }
     }
 
 }
