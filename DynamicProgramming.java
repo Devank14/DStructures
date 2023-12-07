@@ -37,6 +37,9 @@ public class DynamicProgramming {
         System.out.println(dp.balancedBTs(5));
         System.out.println(dp.balancedBTsMemo(5));
         System.out.println(dp.balancedBTsDP(5));
+
+        System.out.println(dp.minCount(8));
+        System.out.println(dp.minCountMemo(8));
     }
 
     public int fibonacci(int n) {
@@ -335,8 +338,7 @@ public class DynamicProgramming {
         }
 
         long[] arr = new long[height + 1];
-        arr[0] = 1;
-        arr[1] = 1;
+        arr[0] = arr[1] = 1;
 
         return balancedBTsMemo(height, arr);
     }
@@ -375,6 +377,59 @@ public class DynamicProgramming {
         }
 
         return arr[height];
+    }
+
+    /*
+     * Given an integer n, find and return the count of minimum numbers
+     * required to represent n as a sum of squares. That is, if n = 4, it
+     * can be represented by (1^2+1^2+1^2+1^2) and (2^2). The output will
+     * be 1, since 1 is the minimum coutn of number required to represent
+     * N as a sum of squares.
+     */
+
+    // **** TOUGH ****
+  
+    public int minCount(int n) {
+
+        if (n == 0)
+            return 0;
+        int minAns = Integer.MAX_VALUE;
+        for (int i = 1; i * i <= n; i++) {
+            int currAns = minCount(n - (i * i));
+
+            if (minAns > currAns) {
+                minAns = currAns;
+            }
+        }
+        return 1 + minAns;
+    }
+
+    public int minCountMemo(int n) {
+
+        int[] arr = new int[n + 1];
+        Arrays.fill(arr, -1);
+        return minCountMemo(n, arr);
+    }
+
+    private int minCountMemo(int n, int[] arr) {
+
+        if (n == 0)
+            return 0;
+        int minAns = Integer.MAX_VALUE;
+        for (int i = 1; i * i <= n; i++) {
+            int currAns;
+            if (arr[n - (i * i)] == -1) {
+                currAns = minCount(n - (i * i));
+                arr[n - (i * i)] = currAns;
+            } else {
+                currAns = arr[n - (i * i)];
+            }
+            if (minAns > currAns) {
+                minAns = currAns;
+            }
+        }
+        return 1 + minAns;
+
     }
 
 }
