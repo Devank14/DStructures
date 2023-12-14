@@ -45,11 +45,28 @@ in an infinite loop, wherein we are hopping off the two vertices only, while pri
 to a vertex. So, we have to maintain to record all the vertices we have already visited.
 We will ingest a starting vertex.
 
+Depth First Search: Like the pre-order traversal.
+Breadth first Search: Level Order traversal.
+
 */
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Scanner;
 
 public class graphs {
+
+    public static void main(String args[]) {
+        graphs gph = new graphs();
+        int[][] edges = gph.takeInput();
+        gph.depthFirstSearch(edges);
+        System.out.println();
+        gph.breadthFirstSearch(edges);
+        System.out.println();
+        System.out.println(gph.hasPath(edges, 1, 4));
+    }
 
     public int[][] takeInput() {
         Scanner sc = new Scanner(System.in);
@@ -62,6 +79,7 @@ public class graphs {
         int[][] edges = new int[n][n];
 
         for (int i = 0; i < e; i++) {
+            System.out.println("Enter the vertices of edge no. " + i);
             int firstVertex = sc.nextInt();
             int secondVertex = sc.nextInt();
 
@@ -73,5 +91,93 @@ public class graphs {
         return edges;
     }
 
+    public void depthFirstSearch(int[][] edges) {
+        boolean[] visited = new boolean[edges.length];
+        System.out.print("DFS: ");
+        for (int i = 0; i < visited.length; i++) {
+            if (!visited[i]) {
+                dfs(edges, i, visited);
+            }
+        }
+    }
 
+    public void dfs(int[][] edges, int startingVertex, boolean[] visited) {
+
+        System.out.print(startingVertex + " ");
+        visited[startingVertex] = true;
+        for (int i = 0; i < edges.length; i++) {
+            if (edges[startingVertex][i] == 1 && !visited[i]) {
+                dfs(edges, i, visited);
+            }
+        }
+    }
+
+    public void breadthFirstSearch(int[][] edges) {
+
+        boolean[] visited = new boolean[edges.length];
+        System.out.print("BFS: ");
+        for (int i = 0; i < visited.length; i++) {
+            if (!visited[i])
+                bfs(edges, visited, i);
+        }
+    }
+
+    public void bfs(int[][] edges, boolean[] visited, int startingVertex) {
+
+        Queue<Integer> queue = new LinkedList<Integer>();
+        queue.add(startingVertex);
+        visited[startingVertex] = true;
+
+        while (!queue.isEmpty()) {
+            int vertex = queue.remove();
+            System.out.print(vertex + " ");
+
+            for (int i = 0; i < edges.length; i++) {
+                if (edges[startingVertex][i] == 1 && !visited[i]) {
+                    queue.add(i);
+                    visited[i] = true;
+                }
+            }
+        }
+    }
+
+    /*
+     * Given two vertices, we have to check if there exists a path between the two
+     * vertices. Return true if either they are adjacent or they are connected via
+     * other
+     * vertices. Otherwise return false
+     */
+    public boolean hasPath(int[][] edges, int v1, int v2) {
+
+        // The solution will be to first check if V(i,j) == 1, in this case,
+        // it means that they are adjacent. And if not true then run DFS.
+
+        if (edges[v1][v2] == 1)
+            return true;
+        boolean[] visited = new boolean[edges.length];
+        Arrays.fill(visited, false);
+
+        return hasPathDFS(edges, visited, v1, v2);
+    }
+
+    public boolean hasPathDFS(int[][] edges, boolean[] visited, int v1, int v2) {
+
+        if(v1  == v2) return true;
+        boolean value = false;
+        for(int i = 0; i< edges.length; i++){
+            if(edges[v1][i] == 1 && !visited[i]){
+                visited[i] = true;
+                value = hasPathDFS(edges, visited, i, v2);
+            }
+        }
+        return value;
+    }
+
+    public void getPath(int[][] edges, int v1, int v2, ArrayList<Integer> list){
+
+        //Given an undirected graph, get the path from vertex v1 to v2.
+        for(int i =0; i <edges.length; i++){
+            
+        }
+    }
 }
