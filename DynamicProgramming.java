@@ -1,4 +1,7 @@
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 public class DynamicProgramming {
 
@@ -40,6 +43,12 @@ public class DynamicProgramming {
 
         System.out.println(dp.minCount(8));
         System.out.println(dp.minCountMemo(8));
+
+        System.out.println(dp.sumPossible(10, Arrays.asList(3, 7, 6)));
+        System.out.println(dp.sumPossibleDP(10, Arrays.asList(3, 7, 6)));
+
+        System.out.println(dp.minChange(12, Arrays.asList(1, 2, 3, 5)));
+        System.out.println(dp.minChangeDP(12, Arrays.asList(1, 2, 3, 5)));
     }
 
     public int fibonacci(int n) {
@@ -388,7 +397,7 @@ public class DynamicProgramming {
      */
 
     // **** TOUGH ****
-  
+
     public int minCount(int n) {
 
         if (n == 0)
@@ -430,6 +439,109 @@ public class DynamicProgramming {
         }
         return 1 + minAns;
 
+    }
+
+    // We are given a target amount and a list of numbers.
+    // We have to find if any combination of the list of numbers
+    // can be added to result the amount. The same number can be used multiple
+    // times.
+    // Tough
+
+    public boolean sumPossible(int amount, List<Integer> numbers) {
+
+        if (amount == 0)
+            return true;
+        if (amount < 0)
+            return false;
+
+        for (Integer value : numbers) {
+            boolean val = sumPossible(amount - value, numbers);
+            if (val)
+                return val;
+        }
+
+        return false;
+
+    }
+
+    public boolean sumPossibleDP(int amount, List<Integer> numbers) {
+        return sumPossibleDP(amount, numbers, new HashMap<>());
+    }
+
+    private boolean sumPossibleDP(int amount, List<Integer> numbers, HashMap<Integer, Boolean> map) {
+
+        if (amount == 0)
+            return true;
+        if (amount < 0)
+            return false;
+        if (map.containsKey(amount))
+            return map.get(amount);
+        boolean answer = false;
+
+        for (Integer value : numbers) {
+            answer = sumPossibleDP(amount - value, numbers, map);
+            map.put(value, answer);
+            if (answer)
+                return answer;
+        }
+        return false;
+    }
+
+    // Minimum change: We are given an amount, and some coins
+    // We have to find the minimum number of coins that will make up that amount.
+    // For example: amount = 5 coins: 1,2,3: [{1,1,1,1,1}, {1,1,1,2}, {1,1,3},
+    // {2,2,1}, {2,3}
+    // The answer will be: {2,3}
+
+    // *****TOUGH***** :vv
+
+    public int minChange(int amount, List<Integer> coins) {
+
+        if (amount == 0)
+            return 0;
+
+        if (amount < 0)
+            return -1;
+        int minCoins = -1;
+
+        for (Integer coinVal : coins) {
+            int subCoins = minChange(amount - coinVal, coins);
+            if (subCoins != -1) {
+                subCoins++;
+                if (minCoins > subCoins || minCoins == -1) {
+                    minCoins = subCoins;
+                }
+            }
+        }
+        return minCoins;
+    }
+
+    public int minChangeDP(int amount, List<Integer> coins) {
+        return minChangeDP(amount, coins, new HashMap<>());
+    }
+
+    private int minChangeDP(int amount, List<Integer> coins, HashMap<Integer, Integer> map) {
+
+        if (amount == 0)
+            return 0;
+        if (amount < 0)
+            return -1;
+
+        if (map.containsKey(amount))
+            return map.get(amount);
+
+        int minCoins = -1;
+
+        for (Integer coin : coins) {
+            int subCoins = minChangeDP(amount - coin, coins, map);
+            if (subCoins != -1) {
+                subCoins++;
+                if (subCoins < minCoins || minCoins == -1)
+                    minCoins = subCoins;
+                map.put(amount, minCoins);
+            }
+        }
+        return minCoins;
     }
 
 }
