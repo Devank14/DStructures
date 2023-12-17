@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +48,17 @@ public class DynamicProgramming {
 
         System.out.println(dp.minChange(12, Arrays.asList(1, 2, 3, 5)));
         System.out.println(dp.minChangeDP(12, Arrays.asList(1, 2, 3, 5)));
+
+        int[][] arr = new int[][] {
+                { 3, 4, 1, 2 },
+                { 2, 1, 8, 9 },
+                { 4, 7, 8, 1 }
+        };
+
+        System.out.println(dp.minCostPath(arr));
+        System.out.println(dp.minCostPathDP(arr));
+
+        System.out.println(dp.lcs("asdfgh", "akdflgj"));
     }
 
     public int fibonacci(int n) {
@@ -543,5 +553,98 @@ public class DynamicProgramming {
         }
         return minCoins;
     }
+
+    /*
+     * Minimum Cost Path: An integer matrix of size (M x N) has been given.
+     * Find out the minimum cost to reach from the cell (0,0) to (M-1, N-1).
+     * Cost constitues the sum of values in the cells of the path taken.
+     * From a cell (i, j), you can move in three directions:
+     * 1. ((i+1), j) -> which is down
+     * 2. (i, (j+1)) -> which is right
+     * 3. ((i+1), (j+1))-> which is diagonal
+     */
+
+    public int minCostPath(int[][] input) {
+        return minCostPath(input, 0, 0);
+    }
+
+    private int minCostPath(int[][] input, int i, int j) {
+
+        if (i == input.length - 1 && j == input[0].length - 1) {
+            // destination reached
+            return input[i][j];
+        }
+
+        if (i == input.length - 1 || j == input[0].length - 1)
+            return Integer.MAX_VALUE;
+
+        int rightAmount = minCostPath(input, i, j + 1);
+        int diagonalAmount = minCostPath(input, i + 1, j + 1);
+        int downAmount = minCostPath(input, i + 1, j);
+
+        return input[i][j] + Math.min(downAmount, Math.min(rightAmount, diagonalAmount));
+    }
+
+    public int minCostPathDP(int[][] input) {
+
+        int[][] storage = new int[input.length][input[0].length];
+        for (int[] arr : storage) {
+            Arrays.fill(arr, -1);
+        }
+        return minCostPathDP(input, storage, 0, 0);
+    }
+
+    private int minCostPathDP(int[][] input, int[][] storage, int i, int j) {
+
+        if (i == input.length - 1 && j == input[0].length - 1) {
+            // destination reached
+            storage[i][j] = input[i][j];
+            return storage[i][j];
+        }
+
+        if (i == input.length - 1 || j == input[0].length - 1)
+            return Integer.MAX_VALUE;
+
+        if (storage[i][j] != -1) {
+            return storage[i][j];
+        }
+
+        int rightAmount = minCostPathDP(input, storage, i, j + 1);
+        int diagonalAmount = minCostPathDP(input, storage, i + 1, j + 1);
+        int downAmount = minCostPathDP(input, storage, i + 1, j);
+
+        storage[i][j] = input[i][j] + Math.min(downAmount, Math.min(rightAmount, diagonalAmount));
+        return storage[i][j];
+
+    }
+
+    /*
+     * Longest Common Subsequence : LCS
+     * Given two strings, we have to find the longest common subsequence (not substring)
+     * To compute longest common subsequence, the brute force approach will be, to
+     * just have a list of subsequences from both the strings and then compare to find
+     * the longest common subsequence and return it's length.
+     * 
+     * But the effective approach will be, to check if the first characters of the 
+     * string are same or not. If they are same - Then we can increment the answer. 
+     * If not, then either we can ignore the first character of either of the strings
+     * and compare it or simply ignore the first characters of both the strings.
+     * 
+     * But we can skip writing the case wherein, we skip the first characters of both 
+     * the strings because somewhere down the line, it will get covered.
+     */
+
+     public int lcs(String one, String two){
+
+        if(one.length() == 0 || two.length() == 0) return 0;
+
+        if(one.charAt(0) == two.charAt(0)){
+            return 1 + lcs(one.substring(1), two.substring(1)); 
+        }else{
+            int option1 = lcs(one, two.substring(1));
+            int option2 = lcs(one.substring(1), two);
+            return Math.max(option1, option2);
+        }
+     }
 
 }
