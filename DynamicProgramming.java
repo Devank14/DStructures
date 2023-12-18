@@ -59,6 +59,10 @@ public class DynamicProgramming {
         System.out.println(dp.minCostPathDP(arr));
 
         System.out.println(dp.lcs("asdfgh", "akdflgj"));
+        System.out.println(dp.lcsM("asdfgh", "akdflgj"));
+
+        System.out.println(dp.editDistance("adef", "gbde"));
+        System.out.println(dp.editDistance("adef", "gbde"));
     }
 
     public int fibonacci(int n) {
@@ -620,31 +624,166 @@ public class DynamicProgramming {
 
     /*
      * Longest Common Subsequence : LCS
-     * Given two strings, we have to find the longest common subsequence (not substring)
+     * Given two strings, we have to find the longest common subsequence (not
+     * substring)
      * To compute longest common subsequence, the brute force approach will be, to
-     * just have a list of subsequences from both the strings and then compare to find
+     * just have a list of subsequences from both the strings and then compare to
+     * find
      * the longest common subsequence and return it's length.
      * 
-     * But the effective approach will be, to check if the first characters of the 
-     * string are same or not. If they are same - Then we can increment the answer. 
-     * If not, then either we can ignore the first character of either of the strings
+     * But the effective approach will be, to check if the first characters of the
+     * string are same or not. If they are same - Then we can increment the answer.
+     * If not, then either we can ignore the first character of either of the
+     * strings
      * and compare it or simply ignore the first characters of both the strings.
      * 
-     * But we can skip writing the case wherein, we skip the first characters of both 
+     * But we can skip writing the case wherein, we skip the first characters of
+     * both
      * the strings because somewhere down the line, it will get covered.
      */
 
-     public int lcs(String one, String two){
+    public int lcs(String one, String two) {
 
-        if(one.length() == 0 || two.length() == 0) return 0;
+        if (one.length() == 0 || two.length() == 0)
+            return 0;
 
-        if(one.charAt(0) == two.charAt(0)){
-            return 1 + lcs(one.substring(1), two.substring(1)); 
-        }else{
+        if (one.charAt(0) == two.charAt(0)) {
+            return 1 + lcs(one.substring(1), two.substring(1));
+        } else {
             int option1 = lcs(one, two.substring(1));
             int option2 = lcs(one.substring(1), two);
             return Math.max(option1, option2);
         }
-     }
+    }
+
+    /*
+     * To use Dynamic Programming here first we have to know the storage space
+     * required for this problem. If we are given two strings, what can be the
+     * number of unique combinations for which we have to save the result.
+     * In this case, if we have two strings of length n and m -> Then the total
+     * unique combinations will be (n+1)(m+1).
+     */
+
+    public int lcsM(String one, String two) {
+        int[][] storage = new int[one.length() + 1][two.length() + 1];
+        for (int[] arr : storage) {
+            Arrays.fill(arr, -1);
+        }
+        return lcsM(one, two, storage);
+    }
+
+    private int lcsM(String one, String two, int[][] storage) {
+
+        // THis is done using Memoization.
+
+        if (one.length() == 0 || two.length() == 0) {
+            return 0;
+        }
+
+        int m = one.length();
+        int n = two.length();
+
+        if (storage[m][n] != -1) {
+            return storage[m][n];
+        }
+
+        if (one.charAt(0) == two.charAt(0)) {
+            storage[m][n] = 1 + lcsM(one.substring(1), two.substring(1), storage);
+        } else {
+            int option1 = lcsM(one, two.substring(1), storage);
+            int option2 = lcsM(one.substring(1), two, storage);
+            storage[m][n] = Math.max(option1, option2);
+        }
+
+        return storage[m][n];
+    }
+
+    /*
+     * Edit Distance: Minimum number of oprations to make one string equal to other.
+     * These operations will be Insert, Delete, Substitute/Replace, No swapping in
+     * the same string
+     * 
+     * The base case will be: If we have an empty string, then we will return the
+     * length of the
+     * other string. That is if one is empty - we will return two's length and vice
+     * versa
+     * Why? Because that will be the number of operations required to convert one
+     * into two.
+     * one is empty - we will have to delete all the elements of two, so number of
+     * operations is two's length
+     * two is empty - we will have to insert all the elements of one into two, that
+     * will make the number of
+     * insertions as one's length.
+     * 
+     * One thing has to understood, we are not modifying any of the string, since we
+     * just
+     * have to give the number of modifications. If we plan on inserting- Do not
+     * insert just
+     * add the count, If we plan on deleting - increase the count, substitution -
+     * similar thing
+     */
+
+    public int editDistance(String one, String two) {
+
+        if (one.length() == 0)
+            return two.length();
+        if (two.length() == 0)
+            return one.length();
+
+        if (one.charAt(0) == two.charAt(0)) {
+            return editDistance(one.substring(1), two.substring(1));
+        } else {
+            // Insertion
+            //We have inserted a char in two.
+            int option1 = editDistance(one, two.substring(1));
+ 
+            // Deletion
+            //We have deleted first char from one
+            int option2 = editDistance(one.substring(1), two);
+
+            // Substitution
+            int option3 = editDistance(one.substring(1), two.substring(1));
+
+            return 1 + Math.min(option1, Math.min(option2, option3));
+        }
+    }
+
+    public int editDistanceM(String one, String two){
+
+        int[][] storage = new int[one.length()][two.length()];
+        for(int[] arr : storage){
+            Arrays.fill(arr, -1);
+        }
+        return editDistanceM(one, two, storage);
+    }
+
+    private int editDistanceM(String one, String two, int[][] storage) {
+
+        //This is done using Memoization
+
+        int m = one.length();
+        int n = two.length();
+        
+        if(m == 0){
+            storage[m][n] = n;
+            return storage[m][n];
+        }
+
+        if(n == 0){
+            storage[m][n] = m;
+            return storage[m][n];
+        }
+
+        if(one.charAt(0) ==  two.charAt(0)){
+            storage[m][n] = editDistanceM(one.substring(1), two.substring(1), storage);
+        }else{
+            int option1 = editDistanceM(one, two.substring(1), storage);
+            int option2 = editDistanceM(one.substring(1), two, storage);
+            int option3 = editDistanceM(one.substring(1), two.substring(1), storage);
+            storage[m][n] = 1 + Math.min(option1, Math.min(option2, option3));
+        }
+
+        return storage[m][n];
+    }
 
 }
