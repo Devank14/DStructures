@@ -51,7 +51,7 @@ Breadth first Search: Level Order traversal.
 */
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Scanner;
@@ -61,11 +61,14 @@ public class graphs {
     public static void main(String args[]) {
         graphs gph = new graphs();
         int[][] edges = gph.takeInput();
-        gph.depthFirstSearch(edges);
+        gph.dfs(edges);
         System.out.println();
         gph.breadthFirstSearch(edges);
         System.out.println();
-        System.out.println(gph.hasPath(edges, 1, 4));
+        gph.hasPath(edges, 0, 3);
+        System.out.println();
+        gph.getPath(edges, 0, 3);
+        gph.getPathBFS(edges, 0, 3);
     }
 
     public int[][] takeInput() {
@@ -91,24 +94,21 @@ public class graphs {
         return edges;
     }
 
-    public void depthFirstSearch(int[][] edges) {
-        boolean[] visited = new boolean[edges.length];
+    public void dfs(int[][] edges) {
         System.out.print("DFS: ");
-        for (int i = 0; i < visited.length; i++) {
-            if (!visited[i]) {
-                dfs(edges, i, visited);
-            }
+        boolean[] visited = new boolean[edges.length];
+        for (int i = 0; i < edges.length; i++) {
+            if (!visited[i])
+                depthFirstSearch(edges, i, visited);
         }
     }
 
-    public void dfs(int[][] edges, int startingVertex, boolean[] visited) {
-
-        System.out.print(startingVertex + " ");
-        visited[startingVertex] = true;
+    public void depthFirstSearch(int[][] edges, int sv, boolean[] visited) {
+        System.out.print(sv + "   ");
+        visited[sv] = true;
         for (int i = 0; i < edges.length; i++) {
-            if (edges[startingVertex][i] == 1 && !visited[i]) {
-                dfs(edges, i, visited);
-            }
+            if (edges[sv][i] == 1 && !visited[sv])
+                depthFirstSearch(edges, i, visited);
         }
     }
 
@@ -147,37 +147,97 @@ public class graphs {
      * other
      * vertices. Otherwise return false
      */
-    public boolean hasPath(int[][] edges, int v1, int v2) {
+    public void hasPath(int[][] edges, int v1, int v2) {
 
-        // The solution will be to first check if V(i,j) == 1, in this case,
-        // it means that they are adjacent. And if not true then run DFS.
-
-        if (edges[v1][v2] == 1)
-            return true;
         boolean[] visited = new boolean[edges.length];
-        Arrays.fill(visited, false);
-
-        return hasPathDFS(edges, visited, v1, v2);
+        System.out.println(hasPathDFS(edges, visited, v1, v2));
     }
 
     public boolean hasPathDFS(int[][] edges, boolean[] visited, int v1, int v2) {
 
-        if(v1  == v2) return true;
-        boolean value = false;
-        for(int i = 0; i< edges.length; i++){
-            if(edges[v1][i] == 1 && !visited[i]){
-                visited[i] = true;
-                value = hasPathDFS(edges, visited, i, v2);
-            }
+        visited[v1] = true;
+
+        if (v1 == v2)
+            return true;
+
+        for (int i = 0; i < edges.length; i++) {
+            if (edges[v1][i] == 1 && !visited[i])
+                return hasPathDFS(edges, visited, i, v2);
         }
-        return value;
+
+        return false;
     }
 
-    public void getPath(int[][] edges, int v1, int v2, ArrayList<Integer> list){
+    public void getPath(int[][] edges, int start, int end) {
 
-        //Given an undirected graph, get the path from vertex v1 to v2.
-        for(int i =0; i <edges.length; i++){
-            
+        boolean[] visited = new boolean[edges.length];
+        ArrayList<Integer> path = new ArrayList<Integer>();
+        getPathDFS(edges, start, end, visited, path);
+        System.out.println(path.toString());
+    }
+
+    public void getPathDFS(int[][] edges, int start, int end, boolean[] visited, ArrayList<Integer> path) {
+
+        visited[start] = true;
+
+        if (start == end) {
+            path.add(end);
+            return;
         }
+
+        for (int i = 0; i < edges.length; i++) {
+            if (edges[i][start] == 1 && !visited[i]) {
+                getPathDFS(edges, i, end, visited, path);
+
+                if (!path.isEmpty()) {
+                    path.add(start);
+                    return;
+                }
+            }
+        }
+    }
+
+    // When we want to find through BFS - it is clear that we will have to use a
+    // queue, which will be responsible for ingesting
+    // the visited nodes one by one. But once the queue is filled with the end
+    // vertex, how will we track which vertex actually
+    // added the end vertex? This can be done via a Map, that is use a Map to track
+    // - <V, Who-Added-Vertex-V>
+    // Then through this map we will retrace the path.
+
+    public void getPathBFS(int[][] edges, int start, int end) {
+
+        boolean[] visited = new boolean[edges.length];
+        Queue<Integer> queue = new LinkedList<Integer>();
+        HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
+
+        queue.add(start);
+        visited[start] = true;
+        map.put(start, Integer.MIN_VALUE);
+
+        while (!queue.isEmpty()) {
+            int starting = queue.remove();
+            if (starting == end)
+                break;
+            for (int i = 0; i < edges.length; i++) {
+                if (edges[starting][i] == 1 && !visited[i]) {
+                    queue.add(i);
+                    visited[i] = true;
+                    map.put(i, starting);
+                }
+            }
+        }
+
+        int ending = end;
+        ArrayList<Integer> path = new ArrayList<Integer>();
+
+        while (ending != Integer.MIN_VALUE) {
+            if (!map.containsKey(ending))
+                break;
+            path.add(ending);
+            ending = map.get(ending);
+        }
+
+        System.out.println(path.toString());
     }
 }

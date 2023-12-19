@@ -63,6 +63,8 @@ public class DynamicProgramming {
 
         System.out.println(dp.editDistance("adef", "gbde"));
         System.out.println(dp.editDistance("adef", "gbde"));
+
+        System.out.println(dp.knapsack(new int[] { 6, 1, 2, 4, 5 }, new int[] { 10, 5, 4, 8, 6 }, 5, 0));
     }
 
     public int fibonacci(int n) {
@@ -734,11 +736,11 @@ public class DynamicProgramming {
             return editDistance(one.substring(1), two.substring(1));
         } else {
             // Insertion
-            //We have inserted a char in two.
+            // We have inserted a char in two.
             int option1 = editDistance(one, two.substring(1));
- 
+
             // Deletion
-            //We have deleted first char from one
+            // We have deleted first char from one
             int option2 = editDistance(one.substring(1), two);
 
             // Substitution
@@ -748,10 +750,10 @@ public class DynamicProgramming {
         }
     }
 
-    public int editDistanceM(String one, String two){
+    public int editDistanceM(String one, String two) {
 
         int[][] storage = new int[one.length()][two.length()];
-        for(int[] arr : storage){
+        for (int[] arr : storage) {
             Arrays.fill(arr, -1);
         }
         return editDistanceM(one, two, storage);
@@ -759,24 +761,24 @@ public class DynamicProgramming {
 
     private int editDistanceM(String one, String two, int[][] storage) {
 
-        //This is done using Memoization
+        // This is done using Memoization
 
         int m = one.length();
         int n = two.length();
-        
-        if(m == 0){
+
+        if (m == 0) {
             storage[m][n] = n;
             return storage[m][n];
         }
 
-        if(n == 0){
+        if (n == 0) {
             storage[m][n] = m;
             return storage[m][n];
         }
 
-        if(one.charAt(0) ==  two.charAt(0)){
+        if (one.charAt(0) == two.charAt(0)) {
             storage[m][n] = editDistanceM(one.substring(1), two.substring(1), storage);
-        }else{
+        } else {
             int option1 = editDistanceM(one, two.substring(1), storage);
             int option2 = editDistanceM(one.substring(1), two, storage);
             int option3 = editDistanceM(one.substring(1), two.substring(1), storage);
@@ -786,4 +788,38 @@ public class DynamicProgramming {
         return storage[m][n];
     }
 
+    /*
+     * 0 1 Knapsack
+     * Suppose a theif goes to rob a store, now there is a limit on the weight he
+     * can carry
+     * In that limit he has to choose the items which will yeild the highest value.
+     * Suppose there are 5 items with following weights and respective values and
+     * weight limit is 5kg
+     * W: 6, 1, 2, 4, 5
+     * V: 10, 5, 4, 8, 6
+     * There can be three cases:
+     * (1,2) -> 5+4 = 9
+     * (1,4) -> 5+8 = 13
+     * (5) -> 6
+     */
+
+    public int knapsack(int[] weights, int[] values, int maxWeight, int i) {
+
+        if (i == weights.length || maxWeight == 0)
+            return 0;
+
+        if (weights[i] > maxWeight) {
+            return knapsack(weights, values, maxWeight, i + 1);
+        } else {
+            int withWeight = values[i] + knapsack(weights, values, maxWeight - weights[i], i + 1);
+            int withoutWeight = knapsack(weights, values, maxWeight, i + 1);
+
+            return Math.max(withWeight, withoutWeight);
+        }
+    }
+
+    //Now, how can we memoize the knapsack problem?
+    //There is a serious possibility of overlapping sub problems which can be mapped 
+    //to a particular weight and the value of the particular index that we are on.
+    //So we will memoize based, upon the the particular maximum weight and index.
 }
