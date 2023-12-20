@@ -48,9 +48,20 @@ We will ingest a starting vertex.
 Depth First Search: Like the pre-order traversal.
 Breadth first Search: Level Order traversal.
 
+Directed Graph - Assigning a direction to the edges of the graphs, like one-way road. 
+Weighted Graphs - Not all edges are equal. Every edge will have an assigned weight.
+
+*****SPANNING TREES*****
+
+Trees are graphs where in all the vertices are connected and there is no cycle.
+Spanning Tree: Given an undirected and connected graph, a spanning tree is a tree cotaining all the vertices.
+For a given graph, there can be multiple spanning trees. In a spanning tree we have n number of vertices and n-1 edges.
+
+Minimum Spanning Tree (MST): Graph is connected, undirected and weighted, we want a spanning tree where the weight is minimum.
 */
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -65,10 +76,12 @@ public class graphs {
         System.out.println();
         gph.breadthFirstSearch(edges);
         System.out.println();
-        gph.hasPath(edges, 0, 3);
-        System.out.println();
-        gph.getPath(edges, 0, 3);
-        gph.getPathBFS(edges, 0, 3);
+        // gph.hasPath(edges, 0, 3);
+        // System.out.println();
+        // gph.getPath(edges, 0, 3);
+        // gph.getPathBFS(edges, 0, 3);
+        System.out.println(gph.isConnected(edges));
+        gph.allConnectedComponents(edges);
     }
 
     public int[][] takeInput() {
@@ -240,4 +253,95 @@ public class graphs {
 
         System.out.println(path.toString());
     }
+
+    // Check if the given graph is striongly connected or not
+    // Just run DFS starting from any vertex, after that check the visited array,
+    // if it conatins false, then the graph is not connected.
+
+    public boolean isConnected(int[][] edges) {
+        boolean[] visited = new boolean[edges.length];
+        if (visited.length > 1)
+            isConnected(edges, 0, visited);
+
+        for (Boolean value : visited) {
+            if (value == false)
+                return false;
+        }
+
+        return true;
+    }
+
+    private void isConnected(int[][] edges, int start, boolean[] visited) {
+        visited[start] = true;
+        for (int i = 0; i < edges.length; i++) {
+            if (edges[start][i] == 1 && !visited[i]) {
+                isConnected(edges, i, visited);
+            }
+        }
+    }
+
+    // Print all the connected components in a graph.
+    public void allConnectedComponents(int[][] edges) {
+
+        ArrayList<ArrayList<Integer>> list = new ArrayList<ArrayList<Integer>>();
+        boolean[] visited = new boolean[edges.length];
+        for (int i = 0; i < edges.length; i++) {
+            if (!visited[i]) {
+                ArrayList<Integer> alist = new ArrayList<Integer>();
+                list.add(getConnectedComponent(edges, i, visited, alist));
+            }
+        }
+        for (ArrayList<Integer> lusd : list) {
+            Collections.sort(lusd);
+            for (Integer value : lusd) {
+                System.out.print(value + " ");
+            }
+            System.out.println();
+        }
+    }
+
+    private ArrayList<Integer> getConnectedComponent(int[][] edges, int start, boolean[] visited,
+            ArrayList<Integer> alist) {
+
+        alist.add(start);
+        visited[start] = true;
+
+        for (int i = 0; i < edges.length; i++) {
+            if (edges[i][start] == 1 && !visited[i]) {
+                getConnectedComponent(edges, i, visited, alist);
+            }
+        }
+
+        return alist;
+    }
+
+    // *********************************
+    // ****** KRUSKAL'S ALGORITHM ******
+    // *********************************
+    //
+    // Given a weighted, connected and undirected graph, Kruskal's Algo, helps us to
+    // identify the Minimum Spanning Tree (MST). The most important property of MSTs 
+    // is that if they have n vertices, then they should have n-1 edges. The other 
+    // thing is that there should not be any cycles in an MST.
+    //
+    // According to Kruskal's Algorithm
+    // Keep a count on the number of vertices, One-By-One pick the
+    // least weighted edges whilst making sure that no cycles are formed.
+    // All vertices should be included (n) and (n-1) edges.
+    //
+    // How will we detect a cycle?
+    //
+    // 1. Before adding any edge, if we check weather a path exists for the
+    // vertices. If path exists, then we will not add that edge, otherwise 
+    // we will. But this will increase the complexity. The hasPath() function 
+    // will have a complexity of O(V+E). For every edge, we will have to do 
+    // this work O(V+E), the maximum number of edges possible will be V^2, 
+    // so the complexity will be O(V+E)*V^2.
+    //
+    // 2. Union Find Algorithm: What we will do here is, initailly consider every
+    // vertex to be in it's own disjoint set which is independent. Such that every 
+    // vertex will be its own parent. After adding an edge, we will make one of the 
+    // vertex the parent, then whenever we will choose another vertex, we will check
+    // if 
+
 }
