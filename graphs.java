@@ -58,9 +58,13 @@ Spanning Tree: Given an undirected and connected graph, a spanning tree is a tre
 For a given graph, there can be multiple spanning trees. In a spanning tree we have n number of vertices and n-1 edges.
 
 Minimum Spanning Tree (MST): Graph is connected, undirected and weighted, we want a spanning tree where the weight is minimum.
+Two Algorithms are used to find Minimum Spanning Trees: Both are greedy algorithms
+1. Kruskal's Algorithm
+2. Prim's Algorithm
 */
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -71,17 +75,21 @@ public class graphs {
 
     public static void main(String args[]) {
         graphs gph = new graphs();
-        int[][] edges = gph.takeInput();
-        gph.dfs(edges);
-        System.out.println();
-        gph.breadthFirstSearch(edges);
-        System.out.println();
+        // int[][] edges = gph.takeInput();
+        // gph.dfs(edges);
+        // System.out.println();
+        // gph.breadthFirstSearch(edges);
+        // System.out.println();
         // gph.hasPath(edges, 0, 3);
         // System.out.println();
         // gph.getPath(edges, 0, 3);
         // gph.getPathBFS(edges, 0, 3);
-        System.out.println(gph.isConnected(edges));
-        gph.allConnectedComponents(edges);
+        // System.out.println(gph.isConnected(edges));
+        // gph.allConnectedComponents(edges);
+
+        // gph.kruskal();
+        //gph.dijkstra();
+        gph.floyd_warshall();
     }
 
     public int[][] takeInput() {
@@ -105,6 +113,32 @@ public class graphs {
 
         sc.close();
         return edges;
+    }
+
+    public int[][] takeInputWeighted() {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter the number of Vertices: ");
+        int vertices = sc.nextInt();
+        System.out.println("Enter the number of Edges: ");
+        int edges = sc.nextInt();
+        int[][] graph = new int[vertices][vertices];
+
+        for (int[] arr : graph) {
+            Arrays.fill(arr, -1);
+        }
+
+        for (int i = 0; i < edges; i++) {
+            System.out.println("Enter the vertices and weight of edge: " + i);
+            int vertex1 = sc.nextInt();
+            int vertex2 = sc.nextInt();
+            int weight = sc.nextInt();
+
+            graph[vertex1][vertex2] = weight;
+            graph[vertex2][vertex1] = weight;
+        }
+
+        sc.close();
+        return graph;
     }
 
     public void dfs(int[][] edges) {
@@ -320,8 +354,8 @@ public class graphs {
     // *********************************
     //
     // Given a weighted, connected and undirected graph, Kruskal's Algo, helps us to
-    // identify the Minimum Spanning Tree (MST). The most important property of MSTs 
-    // is that if they have n vertices, then they should have n-1 edges. The other 
+    // identify the Minimum Spanning Tree (MST). The most important property of MSTs
+    // is that if they have n vertices, then they should have n-1 edges. The other
     // thing is that there should not be any cycles in an MST.
     //
     // According to Kruskal's Algorithm
@@ -332,16 +366,348 @@ public class graphs {
     // How will we detect a cycle?
     //
     // 1. Before adding any edge, if we check weather a path exists for the
-    // vertices. If path exists, then we will not add that edge, otherwise 
-    // we will. But this will increase the complexity. The hasPath() function 
-    // will have a complexity of O(V+E). For every edge, we will have to do 
-    // this work O(V+E), the maximum number of edges possible will be V^2, 
+    // vertices. If path exists, then we will not add that edge, otherwise
+    // we will. But this will increase the complexity. The hasPath() function
+    // will have a complexity of O(V+E). For every edge, we will have to do
+    // this work O(V+E), the maximum number of edges possible will be V^2,
     // so the complexity will be O(V+E)*V^2.
     //
-    // 2. Union Find Algorithm: What we will do here is, initailly consider every
-    // vertex to be in it's own disjoint set which is independent. Such that every 
-    // vertex will be its own parent. After adding an edge, we will make one of the 
-    // vertex the parent, then whenever we will choose another vertex, we will check
-    // if 
+    // 2. Union Find Algorithm:
+    // * Initially we will assume that all the vertices are in their own
+    // separate disjoint sets, which means they are their own parents.
+    // * We will pick up the edge with the least weight, and will make
+    // either of the vertices as their parent.
+    // * As we add more edges, we have to make sure that the top most parent of the
+    // vertices is not same, if it same that means there already exists a path
+    // between the vertices.
 
+    class Edge implements Comparable<Edge> {
+        int source;
+        int destination;
+        int weight;
+
+        Edge(int source, int destination, int weight) {
+            this.source = source;
+            this.destination = destination;
+            this.weight = weight;
+        }
+
+        @Override
+        public int compareTo(Edge o) {
+            return this.weight - o.weight;
+        }
+
+    }
+
+    public Edge[] takeInput2() {
+
+        // We return an Edge array, which is sorted in ascending order according to
+        // weight.
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter the number of edges: ");
+        int edge = sc.nextInt();
+        Edge[] edges = new Edge[edge];
+
+        for (int i = 0; i < edge; i++) {
+            System.out.println("Enter the source vertex of " + i);
+            int source = sc.nextInt();
+            System.out.println("Enter the destination vertex of " + i);
+            int destination = sc.nextInt();
+            System.out.println("Enter the weight of " + i);
+            int weight = sc.nextInt();
+
+            Edge item = new Edge(source, destination, weight);
+            edges[i] = item;
+        }
+
+        sc.close();
+        Arrays.sort(edges);
+        return edges;
+    }
+
+    /*
+     * Time Complexity of Kruskal's Algorithm
+     * We are doing three things:
+     * 1. Taking Input: We are taking input for E edges, hence time complexity will
+     * be O(E)
+     * 2. Sorting the Input array: We sort the edge array - O(ElogE)
+     * 3. Cycle Detection using the Union Find Algorithm: For every edge we will
+     * have to check all the vertices, in order to detect a cycle,
+     * hence time taken will be O(VE)
+     * 
+     * O(E) + O(ElogE) + O(VE) = O(ElogE) + O(VE)
+     * 
+     * In worst case we know that there can be V^2 edges
+     * 
+     * So, is there a way to reduce this complexity? We can work upon the cycle
+     * detection mechanism
+     * to reduce the time complexity - Union By Rank & Path Compression.
+     */
+
+    public void kruskal() {
+
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter the number of vertices: ");
+        int vertices = sc.nextInt();
+        Edge[] input = takeInput2();
+        sc.close();
+
+        // Instantiate a parent array to keep record of the parent of vertices.
+        // Initialize the values to indices.
+        int[] parent = new int[vertices];
+        for (int i = 0; i < parent.length; i++) {
+            parent[i] = i;
+        }
+
+        // If we have n vertices, then we should have n-1 edges, in the output array
+        Edge[] output = new Edge[vertices - 1];
+        int count = 0, edgeIndex = 0;
+
+        while (count != output.length) {
+            Edge currentEdge = input[edgeIndex];
+
+            /*
+             * CYCLE DETECTION
+             * We have to check if there exists a cycle
+             * This can be done via the Union Find Algo, wherein we will check
+             * the topmost parent of the vertex using the parent array.
+             * If their parent is same, it means there already exists a path
+             * between the vertices, if not then we have to add it.
+             * Understand, that we have a sorted array according to the weight.
+             * So, we are picking the least weighted edge first.
+             */
+
+            int sourceParent = findTopMostParent(parent, currentEdge.source);
+            int destinationParent = findTopMostParent(parent, currentEdge.destination);
+
+            if (sourceParent != destinationParent) {
+                output[count] = currentEdge;
+                count++;
+                parent[sourceParent] = destinationParent;
+            }
+
+            edgeIndex++;
+        }
+
+        for (int i = 0; i < output.length; i++) {
+            System.out.println(output[i].source + " " + output[i].destination + " " + output[i].weight);
+        }
+
+    }
+
+    public int findTopMostParent(int[] parent, int index) {
+        // Union Find Algorithm
+        if (parent[index] == index)
+            return index;
+        return findTopMostParent(parent, parent[index]);
+    }
+
+    /*
+     *********************************
+     ******* PRIMS'S ALGORITHM *******
+     *********************************
+     * 
+     * This is used to find the Minimum Spanning Tree. Like Kruskal's algo
+     * Prim's algo is also a greedy algorithm, that is we choose the best option out
+     * of multiple options without keeping track of how it may unfold out later.
+     * 
+     * In Prim's Algorithm, we keep track of the following:
+     * 1. The parent of each vertex (Initially null except the source, which is
+     * parent of itself)
+     * 2. The weight of each vertex (Initially, infinity except for the source)
+     * 3. Keeping track of both visited and unvisited vertices.
+     * 
+     * One-by-one, we will visit each un-visited vertex:
+     * 1. Mark it visited
+     * 2. Pick it's neighbours.
+     * 3. Assign them distances if their current distance is greater than the
+     * distance from the picked up vertex.
+     * 4. Set their parent as the picked up vertex.
+     * 
+     * Soon we will have a minimum spanning tree.
+     * 
+     * For Prim's Algorithm we will store the graph in an adjacency matrix.
+     * We have a weighted, undirected graph.
+     */
+
+    public void prim() {
+        int[][] edges = takeInputWeighted();
+        boolean[] visited = new boolean[edges.length];
+        int[] parent = new int[edges.length];
+
+        int[] weights = new int[edges.length];
+        // Setting the inital default values.
+        weights[0] = 0;
+        parent[0] = -1;
+        for (int i = 1; i < weights.length; i++) {
+            weights[i] = Integer.MAX_VALUE;
+        }
+
+        for (int i = 0; i < edges.length; i++) {
+
+            // Pick the unvisited vertex with minimum weight
+            int index = findMinVertex(weights, visited);
+            visited[index] = true;
+
+            // Pick the unvisited neighbours and update the distance, parent
+            for (int j = 0; j < edges.length; j++) {
+                if (edges[index][j] != 0 && !visited[j]) {
+                    weights[j] = edges[index][j];
+                    parent[j] = index;
+                }
+            }
+        }
+
+        // Just print it
+        for (int i = 0; i < edges.length; i++) {
+            if (parent[i] > i) {
+                System.out.println(i + "  " + parent[i] + " " + weights[i]);
+            } else {
+                System.out.println(parent[i] + "  " + i + " " + weights[i]);
+            }
+        }
+
+    }
+
+    public int findMinVertex(int[] weights, boolean[] visited) {
+
+        int minIndex = -1;
+        for (int i = 0; i < weights.length; i++) {
+            if (!visited[i] && (minIndex == -1 || weights[i] < weights[minIndex])) {
+                minIndex = i;
+            }
+        }
+        return minIndex;
+    }
+
+    /*
+     * Time Complexity of Prim's Algorithm
+     * The time complexity of Prim's Algorithm is dependent upon two things:
+     * 1. The type of structure used to store the graph.
+     * 2. How we compute the minimum vertex.
+     * 
+     * If we use the adjacency matrix, that means we will have to go to every vertex
+     * to check if they are neighbouring. That means - O(V^2) work.
+     * In case if we store it in the form of Adjacency list it will be O(V+E)
+     * 
+     * To compute the min vertex - if we use simple loop - that will take O(V)
+     * If we use Min Heap - that will take log(V)
+     * 
+     * So the total time will be: (V+E)logV if we use adjacency matrix and heap
+     */
+
+    /*
+     *********************************
+     ****** DIJKSTRA'S ALGORITHM *****
+     *********************************
+     * 
+     * Used to find the shortest distance from the source vertex to all vertices.
+     * From the source vertex, keep a track of distances to all the vertices,
+     * initially it will be infinity. Then step by step we will choose the nearest
+     * neighbours and update their distances. We will do this untill all the
+     * vertices have been visited.
+     * 
+     * Time Complexity of Dijkstra: O(V^2)
+     * Better after using Min Heaps and Adjacency list - (V+E)logV
+     */
+
+    public void dijkstra() {
+
+        int[][] edges = takeInputWeighted();
+        int[] distance = new int[edges.length];
+        boolean[] visited = new boolean[edges.length];
+
+        distance[0] = 0;
+        for (int i = 1; i < distance.length; i++) {
+            distance[i] = Integer.MAX_VALUE;
+        }
+
+        int i = 0;
+        while (i != edges.length - 1) {
+
+            int minIndex = findMinVertex(distance, visited);
+            visited[minIndex] = true;
+            for (int j = 0; j < edges.length; j++) {
+                if (edges[minIndex][j] != -1 && !visited[j]) {
+                    if (edges[minIndex][j] + distance[minIndex] < distance[j])
+                        distance[j] = edges[minIndex][j] + distance[minIndex];
+                }
+            }
+            i++;
+        }
+
+        for (int j = 0; j < distance.length; j++) {
+            System.out.println(j + " " + distance[j]);
+        }
+    }
+
+    /*
+     *********************************
+     *** FLOYD WARSHALL'S ALGORITHM **
+     *********************************
+     * 
+     * Floyd warshall algorithm makes use of Dynamic Programming.
+     * It is used to find the minimum distance from one vertex to another, just like
+     * Dijkstra. But in FW, we are able to compute shortest distance from every
+     * vertex to every other vertex. The same result can be achieved via Dijkstra,
+     * only if we run Dijkstra on every vertex. So, if Dijkstra take O(v^2) then
+     * running it on v vertices will result in O(v^3) complexity.
+     * 
+     * Dijkstra: Shortest path from one node to all nodes
+     * Bellman Ford: Shortest path from one node to all nodes, negative edges
+     * allowed
+     * Floyd Warshall: Shortest path between all pairs of vertices, negative edges
+     * allowed.
+     */
+
+    public int[][] takeInputFloyd_Warshall() {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter the number of Vertices: ");
+        int vertices = sc.nextInt();
+        System.out.println("Enter the number of Edges: ");
+        int edges = sc.nextInt();
+        int[][] graph = new int[vertices][vertices];
+
+        for (int[] arr : graph) {
+            Arrays.fill(arr, 9999);
+        }
+
+        for (int i = 0; i < edges; i++) {
+            System.out.println("Enter the vertices and weight of edge: " + i);
+            int vertex1 = sc.nextInt();
+            int vertex2 = sc.nextInt();
+            int weight = sc.nextInt();
+
+            graph[vertex1][vertex2] = weight;
+        }
+
+        sc.close();
+        return graph;
+    }
+
+    public void floyd_warshall() {
+        int[][] output = takeInputFloyd_Warshall();
+
+        for (int i = 0; i < output.length; i++) {
+            output[i][i] = 0;
+        }
+
+        for (int k = 0; k < output.length; k++) {
+            for (int i = 0; i < output.length; i++) {
+                for (int j = 0; j < output.length; j++) {
+
+                    if(output[i][j] > output[i][k] + output[k][j]){
+                        output[i][j] = output[i][k] + output[k][j];
+                    }
+                }
+            }
+        }
+
+        for(int i = 0; i < output.length; i++){
+            for(int j =0; j < output[0].length; j++){
+                System.out.print(output[i][j]+" ");
+            }
+            System.out.println();
+        }
+    }
 }
