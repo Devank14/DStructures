@@ -63,9 +63,11 @@ Two Algorithms are used to find Minimum Spanning Trees: Both are greedy algorith
 2. Prim's Algorithm
 */
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -88,8 +90,9 @@ public class graphs {
         // gph.allConnectedComponents(edges);
 
         // gph.kruskal();
-        //gph.dijkstra();
-        gph.floyd_warshall();
+         gph.dijkstra();
+        //gph.floyd_warshall();
+        //gph.topological_sort();
     }
 
     public int[][] takeInput() {
@@ -134,7 +137,6 @@ public class graphs {
             int weight = sc.nextInt();
 
             graph[vertex1][vertex2] = weight;
-            graph[vertex2][vertex1] = weight;
         }
 
         sc.close();
@@ -696,18 +698,94 @@ public class graphs {
             for (int i = 0; i < output.length; i++) {
                 for (int j = 0; j < output.length; j++) {
 
-                    if(output[i][j] > output[i][k] + output[k][j]){
+                    if (output[i][j] > output[i][k] + output[k][j]) {
                         output[i][j] = output[i][k] + output[k][j];
                     }
                 }
             }
         }
 
-        for(int i = 0; i < output.length; i++){
-            for(int j =0; j < output[0].length; j++){
-                System.out.print(output[i][j]+" ");
+        for (int i = 0; i < output.length; i++) {
+            for (int j = 0; j < output[0].length; j++) {
+                System.out.print(output[i][j] + " ");
             }
             System.out.println();
         }
     }
+
+    /*
+     *********************************
+     ******* TOPOLOGICAL SORT ********
+     *********************************
+     * 
+     * Given directed acyclic graph (DAG), we have to topologically sort the
+     * vertices, such the correct parent-child relation is maintained. In short,
+     * a child can not come before the parent. We do not care about the
+     * weights of the edges.
+     * 
+     * We choose a random vertex, we check does it have children?
+     * If yes, we go to the children one-by-one, if no that means the vertex has
+     * been fully explored, hence can be added into the stack.
+     * We use a Stack to ensure that the correct order is preserved.
+     * 
+     * Only when a vertex has been fully explored, it can be added into the stack.
+     * 
+     * The time complexity of topological sort is O(V+E), which is the time taken to
+     * perform DFS, another O(V) time is taken to fill up the stack, hence total
+     * will be O(V+E).
+     */
+
+    public void topological_sort() {
+
+        int[][] input = topological_sort_input();
+        boolean[] visited = new boolean[input.length];
+        Deque<Integer> stack = new ArrayDeque<Integer>();
+
+        for(int i =0; i < input.length; i++){
+            if(!visited[i]){
+                topological_sort(input, stack, visited, i);
+            }
+        }
+
+        while(!stack.isEmpty()){
+            System.out.print(stack.pop()+"  ");
+        }
+    }
+
+    private void topological_sort(int[][] input, Deque<Integer> stack, boolean[] visited, int vertex){
+
+        visited[vertex] = true;
+        for(int i =0; i < input.length; i++){
+            if(input[vertex][i] != -1 && !visited[i]){
+                topological_sort(input, stack, visited, i);
+            }
+        }
+        stack.offerFirst(vertex);
+
+    }
+
+    public int[][] topological_sort_input(){
+        //We will not take input of the weights.
+        System.out.println("Enter the number of vertices: ");
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        System.out.println("Enter the number of edges: ");
+        int e = sc.nextInt();
+
+        int[][] edges = new int[n][n];
+        for(int[] arr : edges){
+            Arrays.fill(arr, -1);
+        }
+
+        for(int i =0 ; i<e; i++){
+            System.out.println("Enter the vertices for edge "+i);
+            int vertex1 = sc.nextInt();
+            int vertex2 = sc.nextInt();
+            edges[vertex1][vertex2] = 1;
+        }
+
+        sc.close();
+        return edges;
+    }
+
 }
