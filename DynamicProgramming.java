@@ -408,7 +408,7 @@ public class DynamicProgramming {
      * Given an integer n, find and return the count of minimum numbers
      * required to represent n as a sum of squares. That is, if n = 4, it
      * can be represented by (1^2+1^2+1^2+1^2) and (2^2). The output will
-     * be 1, since 1 is the minimum coutn of number required to represent
+     * be 1, since 1 is the minimum count of number required to represent
      * N as a sum of squares.
      */
 
